@@ -52,8 +52,8 @@ module "secureaccountterraform" {
 */
 module "lex_bot" {
   source        = "./chatbotterraform/lex"
-  #bot_name      = "MyChatbot"
-  #lambda_arn    = module.lambda.lambda_arn
+  bot_name      = "MyChatbot"
+  lambda_arn    = module.lambda.lambda_arn
   # Add other configuration options as needed
 }
 
