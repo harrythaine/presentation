@@ -1,3 +1,70 @@
+resource "aws_lex_bot" "chatbot" {
+  name         = "MyChatbot"
+  role_arn     = aws_iam_role.lex_bot_role.arn
+  child_directed = false  # Set this to the appropriate value
+
+  intent {
+    name = "HelloIntent"
+
+    fulfillment_activity {
+      type = "CodeHook"
+      code_hook {
+        uri              = module.lambda.lambda_arn
+        message_version = "1.0"
+        alias           = "latest"
+      }
+    }
+
+    sample_utterances = ["Hello", "Hi", "Greetings", "How can I help you?"]
+
+    clarification_prompt {
+      messages {
+        content_type = "PlainText"
+        content      = "I'm sorry, I didn't understand. Can you please rephrase?"
+      }
+    }
+
+    conclusion_statement {
+      messages {
+        content_type = "PlainText"
+        content      = "Hello Max, Sarah & Piotr! I hope you're doing well today, you can ask me about Harry's professional background, his education and certification, or his technical specialties?"
+      }
+    }
+
+    confirmation_prompt {
+      max_attempts = 2
+      messages {
+        content_type = "PlainText"
+        content      = "Did you find the information you were looking for?"
+      }
+    }
+
+    rejection_statement {
+      messages {
+        content_type = "PlainText"
+        content      = "No worries! If you have any questions, feel free to ask."
+      }
+    }
+  }
+}
+
+resource "aws_iam_role" "lex_bot_role" {
+  name = "LexBotRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
+      Principal = {
+        Service = "lex.amazonaws.com",
+      },
+    }],
+  })
+}
+
+
+
 resource "aws_lex_intent" "hello_intent" {
   bot_name = aws_lex_bot.chatbot.name
   name     = "HelloIntent"
@@ -5,7 +72,7 @@ resource "aws_lex_intent" "hello_intent" {
   fulfillment_activity {
     type = "CodeHook"
     code_hook {
-      uri              = module.lambda.lambda_arn
+    #  uri              = module.lambda.lambda_arn
       message_version = "1.0"
       alias           = "latest"
     }
