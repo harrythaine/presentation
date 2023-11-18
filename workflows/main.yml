@@ -1,0 +1,50 @@
+name: Deploy Chatbot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.0.9
+
+    - name: Terraform Init
+      run: terraform init ./ec2
+
+    - name: Terraform Validate
+      run: terraform validate ./ec2
+
+    - name: Build and Push Docker Image
+      run: |
+        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        docker build -t your-docker-image:latest ./ecs
+        docker push your-docker-image:latest
+
+    - name: Terraform Init (ECS)
+      run: terraform init ./ecs
+
+    - name: Terraform Validate (ECS)
+      run: terraform validate ./ecs
+
+    - name: Terraform Plan
+      run: terraform plan ./ec2 ./ecs
+
+    - name: Confirm Deployment
+      run: |
+        echo "This is a manual approval step."
+        echo "Review the Terraform plan and confirm whether to deploy or not."
+
+    - name: Terraform Apply
+      if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+      run: terraform apply -auto-approve ./ec2 ./ecs
