@@ -16,8 +16,8 @@ resource "aws_iam_role" "lambda_execution_role" {
 
 # IAM Role policy for Lambda
 resource "aws_iam_role_policy" "lambda_policy" {
-  name   = "LambdaPolicy"
-  role   = aws_iam_role.lambda_execution_role.name
+  name = "LambdaPolicy"
+  role = aws_iam_role.lambda_execution_role.id  # Use the role's id here
 
   policy = <<POLICY
 {
@@ -51,6 +51,6 @@ resource "aws_lambda_function" "chatbot_lambda" {
 
 # Attach IAM policy to role
 resource "aws_iam_role_policy_attachment" "test-attach" {
-  role       = aws_iam_role.lambda_execution_role.name
   policy_arn = aws_iam_role_policy.lambda_policy.arn
+  role       = aws_iam_role.lambda_execution_role.name
 }

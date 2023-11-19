@@ -29,9 +29,9 @@ resource "aws_lex_bot" "chatbot" {
 
   idle_session_ttl_in_seconds = 300
 
-  voice_id = "Joanna"
+  voice_id = "Brian"
 
-  locale = "en-US"
+  locale = "en-GB"
 
   nlu_intent_confidence_threshold = 0.4
 

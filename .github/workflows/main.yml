@@ -36,8 +36,8 @@ jobs:
     - name: Build and Push Docker Image
       run: |
         echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        docker build -t your-docker-image:latest ./ecs
-        docker push your-docker-image:latest
+        docker build -t htbBot:latest ./ecs
+        docker push htbBot:latest
 
     - name: Terraform Init (ECS)
       run: terraform init ./ecs
@@ -55,13 +55,23 @@ jobs:
 
     - name: Terraform Apply
       if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+      env:
+        TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
       run: terraform apply -auto-approve ./ec2 ./ecs
 
-    - name: Confirm Destory
+    - name: Confirm Destroy
       run: |
-        echo "This is a manual approval step top destory what was just created."
-        echo "Review the Terraform plan and confirm whether to destory or not."
+        echo "This is a manual approval step to destroy what was just created."
+        echo "Review the Terraform plan and confirm whether to destroy or not."
 
-    - name: Terraform Destory
+    - name: Terraform Destroy
       if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
-      run: terraform destory -auto-approve ./ec2 ./ecs 
+      env:
+        TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+      run: terraform destroy -auto-approve ./ec2 ./ecs
