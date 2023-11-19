@@ -1,1 +1,0 @@
-{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"ec2","Source":"./chatbotterraform/ec2","Dir":"chatbotterraform/ec2"},{"Key":"ecs","Source":"./chatbotterraform/ecs","Dir":"chatbotterraform/ecs"},{"Key":"lambda","Source":"./chatbotterraform/lambda","Dir":"chatbotterraform/lambda"},{"Key":"lex_bot","Source":"./chatbotterraform/lex","Dir":"chatbotterraform/lex"}]}

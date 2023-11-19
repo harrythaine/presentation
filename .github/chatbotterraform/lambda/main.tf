@@ -1,29 +1,4 @@
-variable "lambda_environment" {
-  type = map(string)
-}
-
-
-resource "aws_lambda_function" "chatbot_lambda" {
-  function_name = "chatbotLambda"
-  role          = aws_iam_role.lambda_execution_role.arn
-  handler       = "main.lambda_handler"
-  runtime       = "python3.8"
-  filename      = "./lambda/main.zip"  # Path to your Lambda deployment package
-
-  dynamic "environment" {
-    for_each = var.lambda_environment
-
-    content {
-      variables = {
-        "${environment.key}" = environment.value
-      }
-    }
-  }
-}
-
-
-
-
+# main.tf in lambda module
 
 # IAM Role for Lambda execution
 resource "aws_iam_role" "lambda_execution_role" {
@@ -41,9 +16,10 @@ resource "aws_iam_role" "lambda_execution_role" {
   })
 }
 
+# IAM Role policy for Lambda
 resource "aws_iam_role_policy" "lambda_policy" {
   name   = "LambdaPolicy"
-  role   = aws_iam_role.lambda_role.id
+  role   = aws_iam_role.lambda_execution_role.id  # Use the role's id here
 
   policy = <<POLICY
 {
@@ -59,11 +35,29 @@ resource "aws_iam_role_policy" "lambda_policy" {
 POLICY
 }
 
-resource "aws_iam_role_policy_attachment" "test-attach" {
-  role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = aws_iam_policy.lambda_policy.arn
+# Lambda function
+resource "aws_lambda_function" "chatbot_lambda" {
+  function_name = "chatbotLambda"
+  role          = aws_iam_role.lambda_execution_role.arn
+  handler       = "main.lambda_handler"
+  runtime       = "python3.8"
+  filename      = "./lambda/main.zip"  # Path to your Lambda deployment package
+
+  dynamic "environment" {
+    for_each = var.lambda_environment
+
+    content {
+      variables = {
+        LEX_BOT_NAME         = var.lex_bot_information
+        "${environment.key}" = environment.value
+      }
+    }
+  }
 }
 
-output "lambda_arn" {
-  value = aws_lambda_function.chatbot_lambda.arn
+# Attach IAM policy to role
+resource "aws_iam_role_policy_attachment" "test-attach" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = aws_iam_role_policy.lambda_policy.id
 }
+
