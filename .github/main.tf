@@ -52,18 +52,20 @@ module "secureaccountterraform" {
 */
 module "lex_bot" {
   source        = "./chatbotterraform/lex"
-  bot_name      = "MyChatbot"
   lambda_arn    = module.lambda.lambda_arn
   # Add other configuration options as needed
 }
 
 module "lambda" {
-  source = "./chatbotterraform/lambda"
-    lambda_environment = {
-    LEX_BOT_NAME = aws_lex_bot.chatbot.name
-    }
-  # Add Lambda configuration options as needed
+  source              = "./chatbotterraform/lambda"
+  lex_bot_information = module.lex_bot.lex_bot_information
+  lambda_environment  = {
+    lex_bot_name = module.lex_bot.lex_bot_name
+    # Add other environment variables as needed
+  }
+  # Add other Lambda configuration options as needed
 }
+
 
 module "ecs" {
   source = "./chatbotterraform/ecs"
