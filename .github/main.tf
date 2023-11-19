@@ -15,7 +15,8 @@ terraform {
 # Download any stable version in AWS provider of 2.19.0 or higher in 2.19 train
 provider "aws" {
   region  = "eu-west-2"
-
+  access_key = var.AWS_ACCESS_KEY_ID
+  secret_key = var.AWS_SECRET_ACCESS_KEY
 
 }
 
@@ -51,10 +52,9 @@ module "secureaccountterraform" {
 }
 */
 
+
 module "lambda" {
   source              = "./chatbotterraform/lambda"
-  lex_bot_information = module.lex_bot.lex_bot
-  lex_bot_name        = module.lex_bot.lex_bot_name
   lambda_environment  = {
     lex_bot_name = module.lex_bot.lex_bot_name
     # Add other environment variables as needed
@@ -68,7 +68,6 @@ module "lex_bot" {
   # Add other configuration options as needed
 }
 
-
 module "ecs" {
   source = "./chatbotterraform/ecs"
   # Add ECS configuration options as needed
@@ -76,5 +75,5 @@ module "ecs" {
 
 module "ec2" {
   source = "./chatbotterraform/ec2"
-  # Add ECS configuration options as needed
+  #Add EC2 configuration options as needed
 }

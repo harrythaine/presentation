@@ -1,5 +1,3 @@
-# main.tf in lambda module
-
 # IAM Role for Lambda execution
 resource "aws_iam_role" "lambda_execution_role" {
   name = "LambdaRole"
@@ -19,7 +17,7 @@ resource "aws_iam_role" "lambda_execution_role" {
 # IAM Role policy for Lambda
 resource "aws_iam_role_policy" "lambda_policy" {
   name   = "LambdaPolicy"
-  role   = aws_iam_role.lambda_execution_role.id  # Use the role's id here
+  role   = aws_iam_role.lambda_execution_role.name
 
   policy = <<POLICY
 {
@@ -43,14 +41,10 @@ resource "aws_lambda_function" "chatbot_lambda" {
   runtime       = "python3.8"
   filename      = "./lambda/main.zip"  # Path to your Lambda deployment package
 
-  dynamic "environment" {
-    for_each = var.lambda_environment
-
-    content {
-      variables = {
-        LEX_BOT_NAME         = var.lex_bot_information
-        "${environment.key}" = environment.value
-      }
+  environment = {
+    variables = {
+      LEX_BOT_NAME = "htbBot"
+      # Add other environment variables as needed
     }
   }
 }
@@ -58,6 +52,5 @@ resource "aws_lambda_function" "chatbot_lambda" {
 # Attach IAM policy to role
 resource "aws_iam_role_policy_attachment" "test-attach" {
   role       = aws_iam_role.lambda_execution_role.name
-  policy_arn = aws_iam_role_policy.lambda_policy.id
+  policy_arn = aws_iam_role_policy.lambda_policy.arn
 }
-
