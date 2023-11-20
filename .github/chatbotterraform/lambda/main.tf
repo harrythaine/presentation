@@ -40,14 +40,14 @@ resource "aws_lambda_function" "chatbot_lambda" {
   handler       = "main.lambda_handler"
   runtime       = "python3.8"
   filename      = "./lambda/main.zip"  # Path to your Lambda deployment package
-
-  environment = {
+ environment = {
     variables = {
       LEX_BOT_NAME = "htbBot"
       # Add other environment variables as needed
     }
   }
 }
+
 
 # Attach IAM policy to role
 resource "aws_iam_role_policy_attachment" "test-attach" {
