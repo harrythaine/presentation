@@ -25,10 +25,10 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
-        terraform_version: 1.0.9
+        terraform_version: 1.0.11  # Updated to a more recent version
 
     - name: Terraform Init
-      run: terraform init ./ec2
+      run: terraform init
 
     - name: Terraform Validate
       run: terraform validate ./ec2
