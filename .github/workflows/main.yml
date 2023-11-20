@@ -35,9 +35,9 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-        docker build -t htbBot:latest ./ecs
-        docker push htbBot:latest
+        echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+        docker build -t ghcr.io/${{ github.repository }}/htbBot:latest ./ecs
+        docker push ghcr.io/${{ github.repository }}/htbBot:latest
 
     - name: Terraform Init (ECS)
       run: terraform init ./ecs
