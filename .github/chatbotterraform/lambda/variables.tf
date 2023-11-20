@@ -2,5 +2,7 @@
 
 
 variable "lambda_environment" {
-  type = map(string)
+  type        = map(string)
+  description = "Environment variables for the Lambda function."
+  default     = {}
 }

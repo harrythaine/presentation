@@ -1,56 +1,25 @@
-# IAM Role for Lambda execution
-resource "aws_iam_role" "lambda_execution_role" {
-  name = "LambdaRole"
+# chatbotterraform/lambda/main.tf
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = {
-        Service = "lambda.amazonaws.com",
-      },
-    }],
-  })
+module "iam_role" {
+  source = "../iam_role"
 }
 
-# IAM Role policy for Lambda
-resource "aws_iam_role_policy" "lambda_policy" {
-  name = "LambdaPolicy"
-  role = aws_iam_role.lambda_execution_role.id  # Use the role's id here
-
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "lex:*",
-      "Resource": "*"
-    }
-  ]
-}
-POLICY
+module "iam_role_policy" {
+  source   = "../iam_role_policy"
+  role_arn = module.iam_role.lambda_execution_role.arn
 }
 
-# Lambda function
 resource "aws_lambda_function" "chatbot_lambda" {
   function_name = "chatbotLambda"
-  role          = aws_iam_role.lambda_execution_role.arn
+  role          = module.iam_role.lambda_execution_role.arn
   handler       = "main.lambda_handler"
   runtime       = "python3.8"
-  filename      = "./lambda/main.zip"  # Path to your Lambda deployment package
- environment = {
-    variables = {
-      LEX_BOT_NAME = "htbBot"
-      # Add other environment variables as needed
-    }
-  }
-}
+  filename      = "./lambda/main.zip"
 
-
-# Attach IAM policy to role
-resource "aws_iam_role_policy_attachment" "test-attach" {
-  policy_arn = aws_iam_role_policy.lambda_policy.arn
-  role       = aws_iam_role.lambda_execution_role.name
+  # Comment out the environment block for now
+  # environment = {
+  #   variables = {
+  #     LEX_BOT_NAME = "htbBot"
+  #   }
+  # }
 }
