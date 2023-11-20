@@ -28,10 +28,14 @@ jobs:
         terraform_version: 1.0.11  # Updated to a more recent version
 
     - name: Terraform Init
-      run: terraform init
+      run: |
+        cd ./ec2
+        terraform init
 
     - name: Terraform Validate
-      run: terraform validate ./ec2
+      run: |
+        cd ./ec2
+        terraform validate
 
     - name: Build and Push Docker Image
       run: |
@@ -40,13 +44,18 @@ jobs:
         docker push htbBot:latest
 
     - name: Terraform Init (ECS)
-      run: terraform init ./ecs
+      run: |
+        cd ./ecs
+        terraform init
 
     - name: Terraform Validate (ECS)
-      run: terraform validate ./ecs
+      run: |
+        cd ./ecs
+        terraform validate
 
     - name: Terraform Plan
-      run: terraform plan ./ec2 ./ecs
+      run: |
+        terraform plan ./ec2 ./ecs
 
     - name: Confirm Deployment
       run: |
