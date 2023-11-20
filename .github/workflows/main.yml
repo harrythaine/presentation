@@ -36,10 +36,10 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t ghcr.io/${{ github.repository }}/htbBot:latest ./ecs
+        docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest ./ecs
         docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        docker push ghcr.io/${{ github.repository }}/htbBot:latest
-
+        docker push ghcr.io/${{ github.repository }}/htb-bot:latest
+    
     - name: Terraform Init (ECS)
       run: terraform init ./ecs
 
