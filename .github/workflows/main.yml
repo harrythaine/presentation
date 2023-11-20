@@ -2,9 +2,10 @@ name: Deploy Chatbot
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+    inputs:
+      manual-trigger:
+        description: 'Manually trigger the workflow'
+        default: 'true'
 
 jobs:
   deploy:
@@ -35,8 +36,8 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
         docker build -t ghcr.io/${{ github.repository }}/htbBot:latest ./ecs
+        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
         docker push ghcr.io/${{ github.repository }}/htbBot:latest
 
     - name: Terraform Init (ECS)
@@ -54,12 +55,10 @@ jobs:
         echo "Review the Terraform plan and confirm whether to deploy or not."
 
     - name: Terraform Apply
-      if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+      if: github.event.inputs.manual-trigger == 'true'
       env:
         TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-        TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
       run: terraform apply -auto-approve ./ecs
 
     - name: Confirm Destroy
@@ -68,10 +67,8 @@ jobs:
         echo "Review the Terraform plan and confirm whether to destroy or not."
 
     - name: Terraform Destroy
-      if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+      if: github.event.inputs.manual-trigger == 'true'
       env:
         TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-        TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
       run: terraform destroy -auto-approve ./ecs
