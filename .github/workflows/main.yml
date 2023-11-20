@@ -34,7 +34,7 @@ jobs:
 
     - name: Terraform Init
       run: |
-        ls -al  # List contents of the current directory
+        ls -al ./ec2  # List contents of the ec2 directory
         cd ./ec2
         terraform init
 
