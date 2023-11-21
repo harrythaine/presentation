@@ -38,8 +38,7 @@ jobs:
       run: |
         docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest ${{ github.workspace }}/chatbotterraform/ecs
         docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
-        docker push ghcr.io/${{ github.repository }}/htb-bot:latest
-    
+        docker push ghcr.io/${{ github.repository }}/htb-bot:latest   
     
     - name: Terraform Init (ECS)
       run: terraform init ./
