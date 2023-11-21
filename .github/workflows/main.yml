@@ -50,7 +50,7 @@ jobs:
       run: |
         cd ./chatbotterraform/ecs
         docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest .
-        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
         docker push ghcr.io/${{ github.repository }}/htb-bot:latest
     
 
