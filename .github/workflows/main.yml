@@ -35,12 +35,12 @@ jobs:
       run: |
         cd ./.github/chatbotterraform/ecs
         ls -R
-     
+
     - name: Terraform Init
-      run: terraform init
+      run: terraform init ./.github/chatbotterraform
 
     - name: Terraform Validate
-      run: terraform validate
+      run: terraform validate ./.github/chatbotterraform
 
     - name: Build and Push Docker Image
       run: |
