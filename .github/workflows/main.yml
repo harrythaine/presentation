@@ -36,18 +36,18 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest ./ecs
+        docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest ./chatbotterraform/ecs
         docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
         docker push ghcr.io/${{ github.repository }}/htb-bot:latest
     
     - name: Terraform Init (ECS)
-      run: terraform init ./ecs
+      run: terraform init ./
 
     - name: Terraform Validate (ECS)
-      run: terraform validate ./ecs
+      run: terraform validate ./
 
     - name: Terraform Plan
-      run: terraform plan ./ecs
+      run: terraform plan ./
 
     - name: Confirm Deployment
       run: |
@@ -59,7 +59,7 @@ jobs:
       env:
         TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform apply -auto-approve ./ecs
+      run: terraform apply -auto-approve ./
 
     - name: Confirm Destroy
       run: |
@@ -71,4 +71,4 @@ jobs:
       env:
         TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform destroy -auto-approve ./ecs
+      run: terraform destroy -auto-approve ./
