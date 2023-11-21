@@ -31,6 +31,11 @@ jobs:
     - name: Debug Directory Content
       run: ls -R
     
+    - name: Debug Docker Build Context
+      run: |
+        cd chatbotterraform/ecs
+        ls -R
+     
     - name: Terraform Init
       run: terraform init
 
@@ -39,9 +44,11 @@ jobs:
 
     - name: Build and Push Docker Image
       run: |
-        docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest ${{ github.workspace }}/chatbotterraform/ecs
+        cd chatbotterraform/ecs
+        docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest .
         docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
         docker push ghcr.io/${{ github.repository }}/htb-bot:latest
+    
     
     
     - name: Terraform Init (ECS)
