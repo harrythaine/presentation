@@ -27,7 +27,10 @@ jobs:
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.0.9
-
+    
+    - name: Debug Directory Content
+      run: ls -R
+    
     - name: Terraform Init
       run: terraform init
 
