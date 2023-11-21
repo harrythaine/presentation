@@ -33,7 +33,7 @@ jobs:
     
     - name: Debug Docker Build Context
       run: |
-        cd chatbotterraform/ecs
+        cd ./.github/chatbotterraform/ecs
         ls -R
      
     - name: Terraform Init
