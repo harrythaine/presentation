@@ -37,21 +37,21 @@ jobs:
         ls -R
     
     - name: Terraform Init
-      run: terraform init -chdir=.github
+      run: terraform init 
 
     - name: Terraform Validate
-      run: terraform validate -chdir=.github
+      run: terraform validate 
 
     - name: Build and Push Docker Image
       run: |
-        cd ./.github/chatbotterraform/ecs
+        cd ./chatbotterraform/ecs
         docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest .
         docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
         docker push ghcr.io/${{ github.repository }}/htb-bot:latest
     
 
     - name: Terraform Plan
-      run: terraform plan -chdir=.github
+      run: terraform plan 
 
     - name: Confirm Deployment
       run: |
@@ -63,7 +63,7 @@ jobs:
       env:
         TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform apply -auto-approve -chdir=.github
+      run: terraform apply -auto-approve 
 
     - name: Confirm Destroy
       run: |
@@ -75,4 +75,4 @@ jobs:
       env:
         TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform destroy -auto-approve -chdir=.github
+      run: terraform destroy -auto-approve 
