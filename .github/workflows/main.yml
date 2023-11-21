@@ -31,6 +31,14 @@ jobs:
     - name: Debug Directory Content
       run: ls -R
   
+    - name: Debug Docker Build Context
+      run: |
+        pwd
+        ls -R
+        cd ./chatbotterraform/ecs
+        pwd
+        ls -R
+    
     
     - name: Terraform Init
       run: terraform init 
