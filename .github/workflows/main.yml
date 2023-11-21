@@ -17,8 +17,8 @@ jobs:
 
     - name: Setup AWS Credentials
       env:
-        TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
         echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
@@ -57,6 +57,9 @@ jobs:
 
     - name: Terraform Plan
       run: terraform plan 
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     - name: Confirm Deployment
       run: |
@@ -66,8 +69,8 @@ jobs:
     - name: Terraform Apply
       if: github.event.inputs.manual-trigger == 'true'
       env:
-        TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform apply -auto-approve 
 
     - name: Confirm Destroy
@@ -78,6 +81,6 @@ jobs:
     - name: Terraform Destroy
       if: github.event.inputs.manual-trigger == 'true'
       env:
-        TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: terraform destroy -auto-approve 
