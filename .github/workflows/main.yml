@@ -41,7 +41,7 @@ jobs:
       run: |
         pwd
         ls -R
-        cd ./chatbotterraform/ecs
+        cd ./chatbotterraform/ecs || exit 1  # Exit if the directory doesn't exist
         pwd
         ls -R
 
@@ -110,6 +110,9 @@ jobs:
         AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       run: | 
         echo "Running Terraform Plan"
+        export AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}
+        export AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}
+        export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
         terraform plan
         echo "Terraform Plan Complete"
 
@@ -125,6 +128,8 @@ jobs:
         TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         echo "Running Terraform Apply"
+        export TF_VAR_AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}
+        export TF_VAR_AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}
         terraform apply -auto-approve
         echo "Terraform Apply Complete"
 
@@ -140,5 +145,7 @@ jobs:
         TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: |
         echo "Running Terraform Destroy"
+        export TF_VAR_AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}
+        export TF_VAR_AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}
         terraform destroy -auto-approve
         echo "Terraform Destroy Complete"
