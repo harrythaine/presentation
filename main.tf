@@ -11,23 +11,22 @@ provider "aws" {
   }
 }
 
-
 data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "assume_role" {
   source_json = <<EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "ec2.amazonaws.com"
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": "sts:AssumeRole",
+          "Principal": {
+            "Service": "ec2.amazonaws.com"
+          }
         }
-      }
-    ]
-  }
+      ]
+    }
   EOF
 }
 
@@ -37,14 +36,9 @@ resource "aws_iam_role" "assume_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-
 module "lambda" {
-  source              = "./chatbotterraform/lambda"
-/*  lambda_environment  = {
-    lex_bot_name = module.lex_bot.lex_bot_name  # Check if lex_bot module is defined
-    # Add other environment variables as needed
-  }
-*/  # Add other Lambda configuration options as needed
+  source = "./chatbotterraform/lambda"
+  # Add other Lambda configuration options as needed
 }
 
 module "lex_bot" {
@@ -69,5 +63,5 @@ module "iam_role" {
 
 module "iam_role_policy" {
   source   = "./chatbotterraform/iam_role_policy"
-  role_arn = module.iam_role.lambda_execution_role.arn
+  role_arn = aws_iam_role.assume_role.arn  # Use the ARN of the assumed role
 }
