@@ -60,6 +60,21 @@ jobs:
         docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
         docker push ghcr.io/${{ github.repository }}/htb-bot:latest
     
+    - name: Debug Terraform Environment Variables
+      run: |
+          echo "Printing environment variables for debugging:"
+          env | grep TF_VAR
+      
+    - name: Debug Terraform Configurations
+      run: |
+          echo "Printing Terraform configurations:"
+          cat ./path/to/your/main.tf  # Adjust the path accordingly
+          cat ./path/to/your/variables.tf  # Adjust the path accordingly
+          # Include similar lines for other relevant Terraform configuration files
+      
+    - name: Debug Terraform Version
+      run: terraform --version
+
 
     - name: Terraform Plan
       run: terraform plan 
