@@ -13,13 +13,26 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_iam_role" "assume_role" {
-  name = "AssumedRole"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+data "aws_iam_policy_document" "assume_role" {
+  inline_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      }
+    }
+  ]
+}
+EOF
 }
 
-data "aws_iam_policy_document" "assume_role" {
-  source = "./assume-role-policy.json"
+resource "aws_iam_role" "assume_role" {
+  name             = "AssumedRole"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 module "lambda" {
