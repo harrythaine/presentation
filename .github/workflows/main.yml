@@ -23,16 +23,22 @@ jobs:
       run: |
         echo "TF_VAR_AWS_ACCESS_KEY_ID=$TF_VAR_AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
         echo "TF_VAR_AWS_SECRET_ACCESS_KEY=$TF_VAR_AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
-    
-    - name: Configure AWS CLI
-      run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set default.region eu-west-2
-      
+
+    - name: Setup AWS Assume Role Credentials
+      env:
+        AWS_ROLE_ARN: arn:aws:iam::123456789012:role/AssumedRole
+      run: |
+        aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions | jq -r '.Credentials' > assumed-role.json
+        echo "export AWS_ACCESS_KEY_ID=$(jq -r '.AccessKeyId' assumed-role.json)" >> $GITHUB_ENV
+        echo "export AWS_SECRET_ACCESS_KEY=$(jq -r '.SecretAccessKey' assumed-role.json)" >> $GITHUB_ENV
+        echo "export AWS_SESSION_TOKEN=$(jq -r '.SessionToken' assumed-role.json)" >> $GITHUB_ENV
+        rm assumed-role.json
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v1
       with:
         terraform_version: 1.0.9
-    
+
     - name: Debug Directory Content
       run: ls -R
   
@@ -43,8 +49,7 @@ jobs:
         cd ./chatbotterraform/ecs
         pwd
         ls -R
-    
-    
+
     - name: Terraform Init
       run: terraform init 
 
@@ -62,19 +67,19 @@ jobs:
         docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest .
         docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
         docker push ghcr.io/${{ github.repository }}/htb-bot:latest
-    
+
     - name: Debug Terraform Environment Variables
       run: |
-          echo "Printing environment variables for debugging:"
-          env | grep TF_VAR
-      
+        echo "Printing environment variables for debugging:"
+        env | grep TF_VAR
+
     - name: Debug Terraform Configurations
       run: |
-          echo "Printing Terraform configurations:"
-          cat ./main.tf  # Adjust the path accordingly
-          cat ./variables.tf  # Adjust the path accordingly
-          # Include similar lines for other relevant Terraform configuration files
-      
+        echo "Printing Terraform configurations:"
+        cat ./main.tf  # Adjust the path accordingly
+        cat ./variables.tf  # Adjust the path accordingly
+        # Include similar lines for other relevant Terraform configuration files
+
     - name: Debug Terraform Version
       run: terraform --version
 
@@ -82,21 +87,21 @@ jobs:
       run: |
         echo "Printing GitHub Actions environment variables for debugging:"
         env
+
     - name: Output Terraform Variables
       run: |
         echo "TF_VAR_AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}"
         echo "TF_VAR_AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}"
-      
+
     - name: Terraform Plan
       env:
-          TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       run: | 
-          echo "TF_VAR_AWS_ACCESS_KEY_ID=$TF_VAR_AWS_ACCESS_KEY_ID"
-          echo "TF_VAR_AWS_SECRET_ACCESS_KEY=$TF_VAR_AWS_SECRET_ACCESS_KEY"
-          terraform plan
-
-      
+        echo "TF_VAR_AWS_ACCESS_KEY_ID=$TF_VAR_AWS_ACCESS_KEY_ID"
+        echo "TF_VAR_AWS_SECRET_ACCESS_KEY=$TF_VAR_AWS_SECRET_ACCESS_KEY"
+        terraform plan
 
     - name: Confirm Deployment
       run: |
@@ -120,4 +125,4 @@ jobs:
       env:
         TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform destroy -auto-approve 
+      run: terraform destroy -auto-approve

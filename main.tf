@@ -1,9 +1,42 @@
 # Download any stable version in AWS provider of 2.19.0 or higher in 2.19 train
 provider "aws" {
-  region     = "eu-west-2"
-  access_key = var.TF_VAR_AWS_ACCESS_KEY_ID  # This should reference your variable directly: var.AWS_ACCESS_KEY_ID
-  secret_key = var.TF_VAR_AWS_SECRET_ACCESS_KEY  # Similar change here: var.AWS_SECRET_ACCESS_KEY
+  region = "eu-west-2"
 }
+
+provider "aws" {
+  alias  = "assume_role"
+  region = "eu-west-2"
+  assume_role {
+    role_arn = aws_iam_role.assume_role.arn
+  }
+}
+
+
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_policy_document" "assume_role" {
+  source_json = <<EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": "sts:AssumeRole",
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+        }
+      }
+    ]
+  }
+  EOF
+}
+
+resource "aws_iam_role" "assume_role" {
+  name = "AssumedRole"
+
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
 
 module "lambda" {
   source              = "./chatbotterraform/lambda"
