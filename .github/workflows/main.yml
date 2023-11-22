@@ -68,8 +68,8 @@ jobs:
     - name: Debug Terraform Configurations
       run: |
           echo "Printing Terraform configurations:"
-          cat ./path/to/your/main.tf  # Adjust the path accordingly
-          cat ./path/to/your/variables.tf  # Adjust the path accordingly
+          cat ./main.tf  # Adjust the path accordingly
+          cat ./variables.tf  # Adjust the path accordingly
           # Include similar lines for other relevant Terraform configuration files
       
     - name: Debug Terraform Version
