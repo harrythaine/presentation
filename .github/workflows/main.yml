@@ -48,6 +48,11 @@ jobs:
     - name: Terraform Validate
       run: terraform validate 
 
+    - name: Debug Terraform Variables
+      run: |
+        echo "TF_VAR_AWS_ACCESS_KEY_ID=$TF_VAR_AWS_ACCESS_KEY_ID"
+        echo "TF_VAR_AWS_SECRET_ACCESS_KEY=$TF_VAR_AWS_SECRET_ACCESS_KEY"
+
     - name: Build and Push Docker Image
       run: |
         cd ./chatbotterraform/ecs

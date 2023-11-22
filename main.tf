@@ -14,10 +14,9 @@ terraform {
 */
 # Download any stable version in AWS provider of 2.19.0 or higher in 2.19 train
 provider "aws" {
-  region  = "eu-west-2"
-  access_key = var.TF_VAR_AWS_ACCESS_KEY_ID
-  secret_key = var.TF_VAR_AWS_SECRET_ACCESS_KEY
-
+  region     = "eu-west-2"
+  access_key = var.TF_VAR_AWS_ACCESS_KEY_ID  # This should reference your variable directly: var.AWS_ACCESS_KEY_ID
+  secret_key = var.TF_VAR_AWS_SECRET_ACCESS_KEY  # Similar change here: var.AWS_SECRET_ACCESS_KEY
 }
 
 /*
