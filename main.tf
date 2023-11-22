@@ -14,7 +14,8 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "assume_role" {
-  source_json = <<EOF
+  # Using inline_policy instead of source_json
+  inline_policy = <<EOF
     {
       "Version": "2012-10-17",
       "Statement": [
