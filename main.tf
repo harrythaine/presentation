@@ -13,28 +13,13 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-data "aws_iam_policy_document" "assume_role" {
-  # Using inline_policy instead of source_json
-  inline_policy = <<EOF
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": "sts:AssumeRole",
-          "Principal": {
-            "Service": "ec2.amazonaws.com"
-          }
-        }
-      ]
-    }
-  EOF
-}
-
 resource "aws_iam_role" "assume_role" {
   name = "AssumedRole"
-
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+data "aws_iam_policy_document" "assume_role" {
+  source = "path/to/your/assume-role-policy.json"
 }
 
 module "lambda" {
