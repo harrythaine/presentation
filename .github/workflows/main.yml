@@ -46,7 +46,7 @@ jobs:
       - name: Terraform Graph
         run: |
             echo "Running Terraform Graph"
-            terraform Graph
+            terraform graph
             echo "Terraform Validate Graph"
   
       - name: Build and Push Docker Image
