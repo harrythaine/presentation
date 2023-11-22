@@ -13,8 +13,10 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-data "aws_iam_policy_document" "assume_role" {
-  inline_policy = <<EOF
+resource "aws_iam_role" "assume_role" {
+  name             = "AssumedRole"
+
+  assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -28,11 +30,6 @@ data "aws_iam_policy_document" "assume_role" {
   ]
 }
 EOF
-}
-
-resource "aws_iam_role" "assume_role" {
-  name             = "AssumedRole"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 module "lambda" {
