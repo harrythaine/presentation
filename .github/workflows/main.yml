@@ -68,11 +68,8 @@ jobs:
 
       - name: Setup AWS Assume Role Credentials
         env:
-          AWS_ROLE_ARN: arn:aws:iam::190906547446:role/htbrole
+            AWS_ROLE_ARN: arn:aws:iam::190906547446:role/htbrole
         run: |
-            aws configure set aws_access_key_id ""
-            aws configure set aws_secret_access_key ""
-            aws configure set aws_session_token ""
             assumed_role_credentials=$(aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions)
             export AWS_ACCESS_KEY_ID=$(echo $assumed_role_credentials | jq -r '.Credentials.AccessKeyId')
             export AWS_SECRET_ACCESS_KEY=$(echo $assumed_role_credentials | jq -r '.Credentials.SecretAccessKey')
@@ -81,7 +78,6 @@ jobs:
             echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> $GITHUB_ENV
             echo "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}" >> $GITHUB_ENV
         
-
       - name: Debug Terraform Environment Variables
         run: |
           echo "Printing environment variables for debugging:"
