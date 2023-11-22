@@ -61,3 +61,12 @@ module "iam_role_policy" {
   source   = "./chatbotterraform/iam_role_policy"
   role_arn = aws_iam_role.assume_role.arn  # Use the ARN of the assumed role
 }
+
+# Add the following block to export temporary credentials
+output "temporary_credentials" {
+  value = {
+    aws_access_key     = aws_iam_role.assume_role.arn
+    aws_secret_key     = aws_iam_role.assume_role.arn
+    aws_session_token  = aws_iam_role.assume_role.arn
+  }
+}

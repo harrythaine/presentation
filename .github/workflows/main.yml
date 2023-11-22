@@ -13,130 +13,120 @@ jobs:
     timeout-minutes: 30  # Adjust as needed
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-    - name: Setup AWS Credentials
-      env:
-        TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-        echo "TF_VAR_AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-        echo "TF_VAR_AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-        echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"  # Debugging line
-        echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"  # Debugging line
-    
-    - name: Configure AWS CLI
-      run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set default.region eu-west-2
+      - name: Setup AWS Assume Role Credentials
+        env:
+          AWS_ROLE_ARN: arn:aws:iam::190906547446:role/htbrole
+        run: |
+          export AWS_ACCESS_KEY_ID=$(aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions | jq -r '.Credentials.AccessKeyId')
+          export AWS_SECRET_ACCESS_KEY=$(aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions | jq -r '.Credentials.SecretAccessKey')
+          export AWS_SESSION_TOKEN=$(aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions | jq -r '.Credentials.SessionToken')
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.0.9
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.9
 
-    - name: Debug Directory Content
-      run: ls -R
-  
-    - name: Debug Docker Build Context
-      run: |
-        pwd
-        ls -R
-        cd ./chatbotterraform/ecs || exit 1  # Exit if the directory doesn't exist
-        pwd
-        ls -R
+      - name: Debug Directory Content
+        run: ls -R
 
-    - name: Setup AWS Assume Role Credentials
-      env:
-        AWS_ROLE_ARN: arn:aws:iam::190906547446:role/htbrole
-      run: |
-        export AWS_ACCESS_KEY_ID=$(aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions | jq -r '.Credentials.AccessKeyId')
-        export AWS_SECRET_ACCESS_KEY=$(aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions | jq -r '.Credentials.SecretAccessKey')
-        export AWS_SESSION_TOKEN=$(aws sts assume-role --role-arn $AWS_ROLE_ARN --role-session-name GitHubActions | jq -r '.Credentials.SessionToken')
-    
-    - name: Terraform Init
-      run: |
-        echo "Running Terraform Init"
-        terraform init
-        echo "Terraform Init Complete"
+      - name: Debug Docker Build Context
+        run: |
+          pwd
+          ls -R
+          cd ./chatbotterraform/ecs || exit 1  # Exit if the directory doesn't exist
+          pwd
+          ls -R
 
-    - name: Terraform Validate
-      run: |
-        echo "Running Terraform Validate"
-        terraform validate
-        echo "Terraform Validate Complete"
+      - name: Terraform Init
+        run: |
+          echo "Running Terraform Init"
+          terraform init
+          echo "Terraform Init Complete"
 
-    - name: Debug Terraform Variables
-      run: |
-        echo "TF_VAR_AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}"
-        echo "TF_VAR_AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}"
+      - name: Terraform Validate
+        run: |
+          echo "Running Terraform Validate"
+          terraform validate
+          echo "Terraform Validate Complete"
 
-    - name: Build and Push Docker Image
-      run: |
-        cd ./chatbotterraform/ecs
-        docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest .
-        docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
-        docker push ghcr.io/${{ github.repository }}/htb-bot:latest
+      - name: Debug Terraform Variables
+        run: |
+          echo "TF_VAR_AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}"
+          echo "TF_VAR_AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}"
 
-    - name: Debug Terraform Environment Variables
-      run: |
-        echo "Printing environment variables for debugging:"
-        env | grep TF_VAR
+      - name: Build and Push Docker Image
+        run: |
+          cd ./chatbotterraform/ecs
+          docker build -t ghcr.io/${{ github.repository }}/htb-bot:latest .
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GHCR_TOKEN }}
+          docker push ghcr.io/${{ github.repository }}/htb-bot:latest
 
-    - name: Debug Terraform Configurations
-      run: |
-        echo "Printing Terraform configurations:"
-        cat ./main.tf  # Adjust the path accordingly
-        cat ./variables.tf  # Adjust the path accordingly
-        # Include similar lines for other relevant Terraform configuration files
+      - name: Debug Terraform Environment Variables
+        run: |
+          echo "Printing environment variables for debugging:"
+          env | grep TF_VAR
 
-    - name: Debug Terraform Version
-      run: terraform --version
+      - name: Debug Terraform Configurations
+        run: |
+          echo "Printing Terraform configurations:"
+          cat ./main.tf  # Adjust the path accordingly
+          cat ./variables.tf  # Adjust the path accordingly
+          # Include similar lines for other relevant Terraform configuration files
 
-    - name: Debug GitHub Actions Environment Variables
-      run: |
-        echo "Printing GitHub Actions environment variables for debugging:"
-        env
-    - name: Output Terraform Variables
-      run: |
-        echo "TF_VAR_AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}"
-        echo "TF_VAR_AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}"
+      - name: Debug Terraform Version
+        run: terraform --version
 
-    - name: Terraform Plan
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-      run: | 
-        echo "Running Terraform Plan"
-        terraform plan
-        echo "Terraform Plan Complete"
+      - name: Debug GitHub Actions Environment Variables
+        run: |
+          echo "Printing GitHub Actions environment variables for debugging:"
+          env
 
-    - name: Confirm Deployment
-      run: |
-        echo "This is a manual approval step."
-        echo "Review the Terraform plan and confirm whether to deploy or not."
+      - name: Output Terraform Variables
+        run: |
+          echo "TF_VAR_AWS_ACCESS_KEY_ID=${TF_VAR_AWS_ACCESS_KEY_ID}"
+          echo "TF_VAR_AWS_SECRET_ACCESS_KEY=${TF_VAR_AWS_SECRET_ACCESS_KEY}"
 
-    - name: Terraform Apply
-      if: github.event.inputs.manual-trigger == 'true'
-      env:
-        TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-        echo "Running Terraform Apply"
-        terraform apply -auto-approve
-        echo "Terraform Apply Complete"
+      - name: Terraform Plan
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+        run: | 
+          echo "Running Terraform Plan"
+          terraform plan
+          echo "Terraform Plan Complete"
 
-    - name: Confirm Destroy
-      run: |
-        echo "This is a manual approval step to destroy what was just created."
-        echo "Review the Terraform plan and confirm whether to destroy or not."
+      - name: Confirm Deployment
+        run: |
+          echo "This is a manual approval step."
+          echo "Review the Terraform plan and confirm whether to deploy or not."
 
-    - name: Terraform Destroy
-      if: github.event.inputs.manual-trigger == 'true'
-      env:
-        TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-        echo "Running Terraform Destroy"
-        terraform destroy -auto-approve
-        echo "Terraform Destroy Complete"
+      - name: Terraform Apply
+        if: github.event.inputs.manual-trigger == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+        run: |
+          echo "Running Terraform Apply"
+          terraform apply -auto-approve
+          echo "Terraform Apply Complete"
+
+      - name: Confirm Destroy
+        run: |
+          echo "This is a manual approval step to destroy what was just created."
+          echo "Review the Terraform plan and confirm whether to destroy or not."
+
+      - name: Terraform Destroy
+        if: github.event.inputs.manual-trigger == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ env.AWS_SESSION_TOKEN }}
+        run: |
+          echo "Running Terraform Destroy"
+          terraform destroy -auto-approve
+          echo "Terraform Destroy Complete"
