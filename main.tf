@@ -19,7 +19,7 @@ resource "aws_iam_role" "assume_role" {
 }
 
 data "aws_iam_policy_document" "assume_role" {
-  source = "path/to/your/assume-role-policy.json"
+  source = "./assume-role-policy.json"
 }
 
 module "lambda" {
