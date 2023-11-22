@@ -43,7 +43,12 @@ jobs:
           terraform validate
           echo "Terraform Validate Complete"
 
-
+      - name: Terraform Graph
+        run: |
+            echo "Running Terraform Graph"
+            terraform Graph
+            echo "Terraform Validate Graph"
+  
       - name: Build and Push Docker Image
         run: |
           cd ./chatbotterraform/ecs
